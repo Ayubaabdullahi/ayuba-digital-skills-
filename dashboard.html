@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Premium Dashboard | Ayuba Digital Skills Academy</title>
+  
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700;800&display=swap" rel="stylesheet">
+  
+  <style>
+    :root { 
+        --primary: #0b3c8a; --accent: #c5a059; --bg-light: #f1f5f9; 
+        --white: #ffffff; --dark-nav: #0f172a; --danger: #ef4444;
+    }
+    
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: "Outfit", sans-serif; }
+    body { background: var(--bg-light); padding-top: 75px; color: var(--dark-nav); min-height: 100vh; overflow-x: hidden; }
+
+    /* HEADER & CLOCK */
+    header {
+      background: var(--primary); color: white; position: fixed;
+      top: 0; left: 0; width: 100%; z-index: 1000;
+      padding: 12px 20px; display: flex; justify-content: space-between; align-items: center;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+    .header-left { display: flex; align-items: center; gap: 15px; }
+    .hamburger { cursor: pointer; font-size: 1.4rem; transition: 0.3s; }
+    .hamburger:hover { color: var(--accent); }
+    #digitalClock { background: rgba(255,255,255,0.1); padding: 5px 12px; border-radius: 20px; font-weight: 700; color: var(--accent); font-size: 0.85rem; border: 1px solid rgba(197, 160, 89, 0.3); }
+
+    /* SIDEBAR NAVIGATION */
+    .sidebar { position: fixed; top: 0; left: -100%; width: 280px; height: 100%; background: var(--dark-nav); z-index: 2000; transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1); padding: 25px 15px; display: flex; flex-direction: column; box-shadow: 10px 0 30px rgba(0,0,0,0.5); }
+    .sidebar.active { left: 0; }
+    .nav-links { margin-top: 20px; flex-grow: 1; }
+    .nav-links a { display: flex; align-items: center; gap: 12px; padding: 12px; color: #cbd5e1; text-decoration: none; border-radius: 10px; margin-bottom: 5px; font-size: 0.95rem; transition: 0.3s; }
+    .nav-links a:hover, .nav-links a.active { background: rgba(255,255,255,0.08); color: var(--accent); }
+    
+    .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1500; display: none; backdrop-filter: blur(4px); }
+    .overlay.active { display: block; }
+
+    /* SOCIAL LINKS (Starting with 'm') */
+    .m-socials { display: flex; justify-content: space-around; padding: 20px 0; border-top: 1px solid rgba(255,255,255,0.1); }
+    .m-socials a { font-size: 1.4rem; transition: 0.3s; }
+    .mficon { color: #1877F2; } /* Facebook */
+    .micon { color: #E4405F; }  /* Instagram */
+    .myicon { color: #FF0000; }  /* Youtube */
+    .mwicon { color: #25D366; }  /* Whatsapp */
+    .m-socials a:hover { transform: translateY(-3px); opacity: 0.8; }
+
+    .container { max-width: 1100px; margin: 0 auto; padding: 20px; }
+
+    /* VIP CARD */
+    .vip-card {
+        background: linear-gradient(135deg, #0f172a 0%, #0b3c8a 100%);
+        border-radius: 20px; padding: 30px; color: white; margin-bottom: 30px;
+        position: relative; overflow: hidden; box-shadow: 0 10px 25px rgba(11, 60, 138, 0.3);
+    }
+    .vip-card::after { content: '\f512'; family: 'Font Awesome 6 Free'; weight: 900; position: absolute; right: -20px; bottom: -20px; font-size: 8rem; opacity: 0.05; transform: rotate(-15deg); }
+
+    /* COURSES GRID */
+    .courses-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 25px; }
+    .course-card { background: var(--white); border-radius: 18px; overflow: hidden; box-shadow: 0 5px 15px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; transition: 0.3s; }
+    .course-card:hover { transform: translateY(-5px); box-shadow: 0 12px 25px rgba(0,0,0,0.1); }
+    
+    .img-box { position: relative; height: 190px; overflow: hidden; }
+    .course-img { width: 100%; height: 100%; object-fit: cover; transition: 0.5s; }
+    .course-card:hover .course-img { transform: scale(1.05); }
+    
+    .card-body { padding: 20px; text-align: center; }
+    .course-title { font-weight: 800; font-size: 1.15rem; margin-bottom: 15px; color: var(--primary); display: flex; align-items: center; justify-content: center; gap: 8px; }
+
+    /* BUTTONS */
+    .btn-container { display: flex; flex-direction: column; gap: 10px; }
+    .btn-enter { background: var(--primary); color: white; padding: 13px; border-radius: 10px; text-decoration: none; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 8px; transition: 0.3s; border: none; cursor: pointer; }
+    .btn-buy { background: var(--accent); color: #000; padding: 13px; border-radius: 10px; text-decoration: none; font-weight: 800; display: block; transition: 0.3s; border: none; text-align: center; }
+    .btn-enter:hover { background: #082d69; }
+    .btn-buy:hover { background: #b08d4a; }
+
+    /* MODAL */
+    .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 3000; display: none; justify-content: center; align-items: center; padding: 20px; backdrop-filter: blur(5px); }
+    .modal-content { background: white; padding: 35px; border-radius: 25px; text-align: center; max-width: 400px; width: 100%; animation: popIn 0.3s ease; }
+    @keyframes popIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+    .modal-content i { font-size: 3.5rem; color: var(--danger); margin-bottom: 20px; }
+    .close-modal { background: var(--primary); color: white; padding: 12px 30px; border-radius: 10px; border: none; cursor: pointer; font-weight: 700; margin-top: 10px; width: 100%; }
+  </style>
+</head>
+<body>
+
+<div class="overlay" id="overlay" onclick="toggleMenu()"></div>
+
+<header>
+  <div class="header-left">
+    <div class="hamburger" onclick="toggleMenu()"><i class="fas fa-bars-staggered"></i></div>
+    <img src="logo.jpg" style="width: 35px; height: 35px; border-radius: 50%; border: 2px solid var(--accent);" alt="Logo">
+    <span style="font-weight: 800; letter-spacing: 0.5px;">AYUBA ACADEMY</span>
+  </div>
+  <div id="digitalClock">00:00:00 AM</div>
+</header>
+
+<div class="sidebar" id="sidebar">
+  <div style="display:flex; justify-content:space-between; align-items:center; color:var(--accent); font-weight:800; margin-bottom:25px; padding: 0 5px;">
+    <span>ADS NAVIGATOR</span>
+    <span onclick="toggleMenu()" style="cursor:pointer; font-size:1.8rem;">&times;</span>
+  </div>
+  <nav class="nav-links">
+    <a href="index.html"><i class="fas fa-home"></i> Home Page</a>
+    <a href="dashboard.html" class="active"><i class="fas fa-th-large"></i> Dashboard</a>
+    <a href="courses.html"><i class="fas fa-graduation-cap"></i> All Courses</a>
+    <a href="services.html"><i class="fas fa-user-edit"></i> services</a>
+    <a href="reviews.html"><i class="fas fa-wallet"></i> reviews</a>
+    <a href="about.html"><i class="fas fa-award"></i> About us</a>
+    <a href="help.html"><i class="fas fa-circle-question"></i> Help Center</a>
+    <a href="#" onclick="logout()"><i class="fas fa-right-from-bracket"></i> Logout</a>
+  </nav>
+
+  <div class="m-socials">
+    <a href="#" class="mficon"><i class="fab fa-facebook"></i></a>
+    <a href="#" class="micon"><i class="fab fa-instagram"></i></a>
+    <a href="#" class="myicon"><i class="fab fa-youtube"></i></a>
+    <a href="https://wa.me/2349066851341" class="mwicon"><i class="fab fa-whatsapp"></i></a>
+  </div>
+</div>
+
+<div class="modal-overlay" id="msgModal">
+    <div class="modal-content">
+        <i class="fas fa-circle-xmark"></i>
+        <h3 style="font-weight:800; font-size:1.4rem; margin-bottom:10px;">Samun Dama A Kulle!</h3>
+        <p style="color:#64748b; margin-bottom:20px; line-height:1.6;">Haba dalibinmu, ba ka da izinin shiga wannan ajin a halin yanzu. Don Allah ka fara biya, ko kuma ka tuntubi <b>Admin Ayuba</b> domin budewa.</p>
+        <button class="close-modal" onclick="closeModal()">Na Gane</button>
+    </div>
+</div>
+
+<div class="container">
+  <div class="vip-card">
+    <p style="font-size: 0.85rem; opacity: 0.8; margin-bottom: 5px;">Barka da zuwa,</p>
+    <h2 id="userName" style="font-size: 1.8rem; font-weight: 800; margin-bottom: 10px;">Loading...</h2>
+    <div style="display: flex; align-items: center; gap: 10px;">
+        <span style="background: var(--accent); color: black; padding: 3px 10px; border-radius: 5px; font-size: 0.7rem; font-weight: 800;">PRO STUDENT</span>
+        <p id="studentID" style="color: white; opacity: 0.7; font-weight: 700; font-size: 0.8rem; letter-spacing: 1px;">ADS-ID...</p>
+    </div>
+  </div>
+
+  <div class="courses-grid">
+    <div class="course-card">
+      <div class="img-box"><img src="Ai.jpg" class="course-img" alt="AI"></div>
+      <div class="card-body">
+        <div class="course-title">AI Premium Mastery 🔒</div>
+        <div class="btn-container">
+            <button class="btn-enter" onclick="checkAccess('ai_mastery')"><i class="fas fa-play-circle"></i> ENTER CLASS</button>
+            <a href="courses.html" class="btn-buy">BUY COURSE</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="course-card">
+      <div class="img-box"><img src="Web.jpg" class="course-img" alt="WEB"></div>
+      <div class="card-body">
+        <div class="course-title">Web Design Pro 🔒</div>
+        <div class="btn-container">
+            <button class="btn-enter" onclick="checkAccess('web')"><i class="fas fa-play-circle"></i> ENTER CLASS</button>
+            <a href="courses.html" class="btn-buy">BUY COURSE</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="course-card">
+      <div class="img-box"><img src="Smm.jpg" class="course-img" alt="SMM"></div>
+      <div class="card-body">
+        <div class="course-title">SMM Strategy 🔒</div>
+        <div class="btn-container">
+            <button class="btn-enter" onclick="checkAccess('smm')"><i class="fas fa-play-circle"></i> ENTER CLASS</button>
+            <a href="courses.html" class="btn-buy">BUY COURSE</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="course-card" style="border: 2px solid var(--accent);">
+      <div class="img-box"><img src="Pro.jpg" class="course-img" alt="PRO"></div>
+      <div class="card-body">
+        <div class="course-title" style="color:var(--accent)">Elite All-in-One 🔒</div>
+        <div class="btn-container">
+            <button class="btn-enter" onclick="checkAccess('pro')"><i class="fas fa-crown"></i> ENTER CLASS</button>
+            <a href="courses.html" class="btn-buy">BUY COURSE</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+  import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+  import { getFirestore, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+  const firebaseConfig = { 
+    apiKey: "AIzaSyDPujPkmHXRS1pBifgY6kcpXbN3Ar7W1aM", authDomain: "ayubadigitalacademy.firebaseapp.com",
+    projectId: "ayubadigitalacademy", storageBucket: "ayubadigitalacademy.firebasestorage.app",
+    messagingSenderId: "584571579762", appId: "1:584571579762:web:08ffa80c321dcc6de641eb"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+
+  let userAccess = {};
+
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      document.getElementById("studentID").innerText = "ADS-" + user.uid.substring(0, 8).toUpperCase();
+      onSnapshot(doc(db, "users", user.uid), (snap) => {
+        if(snap.exists()){
+          userAccess = snap.data();
+          document.getElementById("userName").innerText = userAccess.fullName || "Elite Student";
+        }
+      });
+    } else { window.location.href = "auth.html"; }
+  });
+
+  window.checkAccess = (type) => {
+    let hasAccess = false;
+    let isApproved = userAccess.approved || false;
+
+    // --- PRO CHECK LOGIC ---
+    if(type === 'ai_mastery') hasAccess = userAccess.accessAI;
+    if(type === 'web') hasAccess = userAccess.accessWeb;
+    if(type === 'smm') hasAccess = userAccess.accessSMM;
+    if(type === 'pro') hasAccess = userAccess.accessPro;
+
+    // Idan yana da access kuma an amince (approved), sai ya wuce
+    if(hasAccess && isApproved) {
+        window.location.href = `classroom.html?type=${type}`;
+    } else {
+        document.getElementById("msgModal").style.display = "flex";
+    }
+  };
+
+  window.toggleMenu = () => {
+    document.getElementById("sidebar").classList.toggle("active");
+    document.getElementById("overlay").classList.toggle("active");
+  };
+
+  window.closeModal = () => {
+    document.getElementById("msgModal").style.display = "none";
+  };
+
+  window.logout = () => {
+    signOut(auth).then(() => { window.location.href = "auth.html"; });
+  };
+
+  // CLOCK LOGIC
+  setInterval(() => {
+    const options = { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true };
+    document.getElementById('digitalClock').innerText = new Date().toLocaleTimeString('en-US', options);
+  }, 1000);
+</script>
+</body>
+</html>

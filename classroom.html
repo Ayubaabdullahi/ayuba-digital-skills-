@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Presidential Classroom | Ayuba Digital Skills Academy</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700;900&family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary: #050a18;
+            --accent: #c5a059;
+            --glass: rgba(255, 255, 255, 0.03);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --room-bg: #0a1120;
+            --text-main: #e6f1ff;
+        }
+
+        html, body { 
+            margin: 0; padding: 0; width: 100%; overflow-x: hidden; 
+            background: var(--primary); color: var(--text-main); 
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+        /* --- SIDEBAR --- */
+        #mSidebar {
+            width: 290px; background: #050a18; border-right: 1px solid var(--glass-border);
+            position: fixed; left: -290px; height: 100vh; z-index: 5000; 
+            transition: 0.4s cubic-bezier(0.7, 0, 0.3, 1); padding: 25px 15px; overflow-y: auto;
+        }
+        #mSidebar.m-open { left: 0; }
+        .close-btn { position: absolute; top: 15px; right: 15px; font-size: 1.8rem; color: var(--accent); cursor: pointer; }
+        
+        .nav-label { font-size: 0.6rem; color: #475569; letter-spacing: 2px; font-weight: 800; padding: 15px 15px 5px; display: block; }
+        .nav-item { padding: 12px 15px; color: #8892b0; text-decoration: none; display: flex; align-items: center; gap: 12px; border-radius: 12px; margin-bottom: 5px; transition: 0.3s; font-weight: 600; font-size: 0.9rem; }
+        .nav-item:hover, .nav-item.active { background: var(--glass); color: var(--accent); border: 1px solid var(--glass-border); }
+
+        /* --- STAGE --- */
+        .top-hud { height: 85px; padding: 0 20px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--glass-border); position: sticky; top: 0; background: rgba(5,10,24,0.98); backdrop-filter: blur(10px); z-index: 2000; width: 100%; }
+        .user-pill { background: var(--glass); padding: 8px 16px; border-radius: 50px; border: 1px solid var(--glass-border); display: flex; align-items: center; gap: 8px; color: var(--accent); font-weight: 800; font-size: 0.75rem; }
+
+        .classroom-container { max-width: 1400px; margin: 0 auto; padding: 30px 15px; display: grid; grid-template-columns: 1fr 300px; gap: 25px; }
+        
+        .house-intro { 
+            background: linear-gradient(135deg, rgba(197, 160, 89, 0.1), transparent);
+            padding: 40px; border-radius: 30px; border-left: 8px solid var(--accent); margin-bottom: 40px;
+        }
+        .house-intro h1 { font-family: 'Outfit'; font-size: 2.2rem; color: #fff; margin-bottom: 10px; }
+
+        .video-room { 
+            background: var(--room-bg); border: 1px solid var(--glass-border); 
+            border-radius: 35px; overflow: hidden; margin-bottom: 50px;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.5);
+        }
+        .room-tv { width: 100%; position: relative; padding-bottom: 56.25%; background: #000; border-bottom: 4px solid var(--accent); }
+        .room-tv iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; }
+        .room-details { padding: 35px; }
+        .room-details h2 { font-family: 'Outfit'; font-size: 1.6rem; margin-bottom: 10px; color: #fff; }
+        .room-desc { font-size: 0.95rem; color: #94a3b8; line-height: 1.8; padding: 20px; border-radius: 15px; background: rgba(255,255,255,0.02); border-left: 4px solid var(--accent); }
+
+        .tool-card { background: var(--glass); border-radius: 25px; padding: 25px; border: 1px solid var(--glass-border); position: sticky; top: 100px; }
+        .social-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 15px; }
+        .social-btn { height: 50px; display: flex; align-items: center; justify-content: center; border-radius: 12px; background: rgba(255,255,255,0.05); color: var(--accent); font-size: 1.2rem; transition: 0.3s; text-decoration: none; }
+        .social-btn:hover { background: var(--accent); color: #000; transform: translateY(-3px); }
+
+        #mOverlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 4500; display: none; backdrop-filter: blur(4px); }
+        #mOverlay.active { display: block; }
+
+        @media (max-width: 1100px) { .classroom-container { grid-template-columns: 1fr; } .tool-card { position: relative; top: 0; } }
+    </style>
+</head>
+<body>
+
+    <div id="mOverlay" onclick="mToggleMenu()"></div>
+
+    <aside id="mSidebar">
+        <i class="fas fa-times close-btn" onclick="mToggleMenu()"></i>
+        <div style="margin: 10px 0 30px 10px;">
+            <h2 style="color:#fff; font-family:'Outfit'; font-size: 1.4rem;">ADS ACADEMY</h2>
+            <p style="font-size:0.55rem; color:var(--accent); letter-spacing:2px;">PREMIUM LEARNING</p>
+        </div>
+        
+        <span class="nav-label">NAVIGATION</span>
+        <a href="index.html" class="nav-item"><i class="fas fa-home"></i> Home</a>
+        <a href="dashboard.html" class="nav-item"><i class="fas fa-th-large"></i> Dashboard</a>
+        <a href="services.html" class="nav-item"><i class="fas fa-tools"></i> Services</a>
+        <a href="courses.html" class="nav-item"><i class="fas fa-graduation-cap"></i> Courses</a>
+        <a href="about.html" class="nav-item"><i class="fas fa-info-circle"></i> About</a>
+        <a href="reviews.html" class="nav-item"><i class="fas fa-star"></i> Reviews</a>
+        <a href="contact.html" class="nav-item"><i class="fas fa-envelope"></i> Contact</a>
+
+        <div id="proGate" style="display:none;">
+            <span class="nav-label">PRO ACCESS</span>
+            <a href="classroom.html?type=pro" class="nav-item active"><i class="fas fa-crown"></i> Elite Pro Bundle</a>
+        </div>
+
+        <div id="adminGate" style="display:none;">
+            <span class="nav-label">ADMIN PANEL</span>
+            <a href="admin.html" class="nav-item" style="border: 1px dashed var(--accent);"><i class="fas fa-user-shield"></i> Control Center</a>
+        </div>
+
+        <a href="#" onclick="handleLogout()" class="nav-item" style="color:#ff4d4d; margin-top:30px;"><i class="fas fa-power-off"></i> Logout System</a>
+    </aside>
+
+    <header class="top-hud">
+        <div style="display:flex; align-items:center; gap:15px;">
+            <i class="fas fa-bars-staggered" style="color:var(--accent); cursor:pointer; font-size:1.6rem;" onclick="mToggleMenu()"></i>
+            <div>
+                <span id="courseLevel" style="font-size:0.6rem; color:var(--accent); font-weight:800; letter-spacing:2px; display:block;">LOADING CLASS...</span>
+                <span style="font-family:'Outfit'; font-weight:900; font-size:1rem; color:#fff;">AYUBA DIGITAL ACADEMY</span>
+            </div>
+        </div>
+        <div class="user-pill">
+            <i class="fas fa-shopping-cart"></i>
+            <span id="userName">Student</span>
+        </div>
+    </header>
+
+    <div class="classroom-container">
+        <main id="mMainGrid"></main>
+
+        <aside>
+            <div class="tool-card">
+                <h4 style="font-size:0.65rem; color:var(--accent); margin-bottom:15px; letter-spacing:1px;">CONNECT PRO</h4>
+                <div class="social-grid">
+                    <a href="#" class="social-btn mficon"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#" class="social-btn micon"><i class="fab fa-instagram"></i></a>
+                    <a href="#" class="social-btn mwicon"><i class="fab fa-whatsapp"></i></a>
+                    <a href="#" class="social-btn myicon"><i class="fab fa-youtube"></i></a>
+                    <a href="#" class="social-btn mticon"><i class="fab fa-tiktok"></i></a>
+                    <a href="#" class="social-btn mxicon"><i class="fab fa-x-twitter"></i></a>
+                </div>
+                <div style="margin-top:25px; border-top:1px solid var(--glass-border); padding-top:15px;">
+                    <p style="font-size:0.6rem; color:#64748b;">STUDY TIMER</p>
+                    <div id="mTimer" style="font-size:1.6rem; font-weight:900; color:var(--accent);">00:00</div>
+                </div>
+            </div>
+        </aside>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        const firebaseConfig = { apiKey: "AIzaSyDPujPkmHXRS1pBifgY6kcpXbN3Ar7W1aM", authDomain: "ayubadigitalacademy.firebaseapp.com", projectId: "ayubadigitalacademy", storageBucket: "ayubadigitalacademy.firebasestorage.app", messagingSenderId: "584571579762", appId: "1:584571579762:web:08ffa80c321dcc6de641eb" };
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // Define logout globally to fix the ReferenceError
+        window.handleLogout = () => {
+            signOut(auth).then(() => {
+                window.location.replace("auth.html");
+            }).catch((error) => console.error("Logout failed", error));
+        };
+
+        const ACADEMY_DB = {
+            'web': { 
+                name: "Web Development (Level 1 & 2)", 
+                intro: "Koyi gina websites na zamani daga tushe har zuwa karshe.",
+                vids: [
+                    {id: 'xjgs5VizVK8', t: 'HTML Basics', d: 'Fahimtar ginshikin website.'},
+                    {id: 'PvO96OY94bc', t: 'Images & Links', d: 'Yadda ake saka hoto da mahada.'},
+                    {id: 'YzF_0OPjoZ0', t: 'Email System', d: 'Saita tsarin tura sako ga kowa.'},
+                    {id: 'Y-bRasuJnB4', t: 'Header Design', d: 'Tsara saman website mai kyan gaske.'},
+                    {id: 'G2pmM7-VVHQ', t: 'CSS Styling', d: 'Koyi ado da launuka na zamani.'},
+                    {id: 'NiNN-HsUupE', t: 'Color Theory', d: 'Zaben launukan da suka dace.'},
+                    {id: '0S9RQTx0u3s', t: 'DNS Mastery', d: 'Sanin yadda Intanet ke aiki.'},
+                    {id: '4SnX1A7VS6s', t: 'Domain Buying', d: 'Yadda ake sayen sunan website.'},
+                    {id: '73j8ADfkiXw', t: 'Server Setup', d: 'Hada website da duniya.'},
+                    {id: 'ZPcxAiCzH9U', t: 'Olitt Setup', d: 'Hanya mafi sauki ta wallafa aiki.'},
+                    {id: 'L-s5RWoGCF0', t: 'Final Launch', d: 'Kammala website dinka 100%.'}
+                ]
+            },
+            'ai_mastery': { 
+                name: "AI Masterclass (Level 1 & 2)", 
+                intro: "Koyi AI Mastery mataki na daya da na biyu don samun kwarewa.",
+                vids: [
+                    {id: '-0eSe3v2r-M', t: '[L1] AI Fundamentals', d: 'Fahimtar matakin farko na duniyar AI.'},
+                    {id: 'xWKg09gHaik', t: '[L1] Future of AI', d: 'Ina duniya ta dosa da wannan fasahar?'},
+                    {id: 'md76hjeNGJo', t: '[L1] Business Examples', d: 'Yadda ake amfani da AI a kasuwanci.'},
+                    {id: 'yDIt_GYCOxk', t: '[L1] Monetize AI', d: 'Fara samun kudi da AI a matakin farko.'},
+                    {id: 'dfiWqcFvDiU', t: '[L1] Essential Tools', d: 'Manhajojin matakin farko.'},
+                    {id: 'wAkrUWe5AfU', t: '[L1] Mobile AI', d: 'Sarrafa AI duka a cikin wayarka.'},
+                    {id: 'w6j3m2cP6kE', t: '[L1] AI Business', d: 'Amfani da AI a kasuwancinka.'},
+                    {id: 'gvCSvzojkWA', t: '[L1] Workflows', d: 'Tsara ayyukan AI cikin sauki.'},
+                    {id: 'EGK0UQ6t3DU', t: '[L2] Skill Upgrade', d: 'AI COURSE LEVEL TWO 2  WANNAN SHINE LEVEL TWO 2.'},
+                    {id: 'viGmbEMVE88', t: '[L2] AI Video Creation', d: 'Hada bidiyo na kwararru ba tare da kyamara ba.'},
+                    {id: 'qXCsJUhPxkM', t: '[L2] Prompt Engineering', d: 'Zama master wajen ba AI umarni na musamman.'},
+                    {id: '3Y0XaLToYPs', t: '[L2] Hidden Secrets', d: 'Boyayyun sirrin matakin koli.'},
+                    {id: 'O46_-qgrtYU', t: '[L2] AI Images', d: 'Kirkirar hotuna masu ban mamaki na kwararru.'},
+                    {id: 'X642tq7DwMc', t: '[L2] Google Gemini', d: 'Mastering the world\'s strongest AI levels.'},
+                    {id: '22PJ1_XWrTY', t: '[L2] Practical Session', d: 'Lokacin gwada kwarewa ta koli a aikace.'},
+                    {id: 'HRsqIQWQbIQ', t: '[L2] Video Apps Intro', d: 'Manyan manhajojin gyaran bidiyo na AI.'}
+                ]
+            },
+            'smm': { 
+                name: "Social Media Manager (Level 1 & 2)", 
+                intro: "Koyi sana'ar kula da shafukan sada zumunta don samun babban kudi.",
+                vids: [
+                    {id: 'UVGIaSqprVY', t: 'SMM Intro', d: 'Mecece sana\'ar SMM?'},
+                    {id: 'DYq8Ly4XBkY', t: 'Instagram Mastery', d: 'Sarrafa IG don kasuwanci.'},
+                    {id: 'vBYzkog6IMI', t: 'Pro Account Setup', d: 'Bude account na kwararru.'},
+                    {id: '10teMr6yU_U', t: 'Facebook Ads', d: 'Kai tallan ka ga miliyoyin mutane.'},
+                    {id: 'Dodq7GV5ROc', t: 'Finding Clients', d: 'Yadda zaka nemo mutanen da zasu biya ka.'},
+                    {id: 'nvHb2gPbzck', t: 'Client Chat', d: 'Yadda ake tattaunawa da manyan mutane.'},
+                    {id: 'Nq_srVcS9Ok', t: 'Closing Deals', d: 'Karbar yarjejeniya da hakkin ka.'},
+                    {id: 'm0CWJn-E9aE', t: 'Meta Business Suite', d: 'Sarrafa tallace-tallace da yawa.'},
+                    {id: 'f-Q3Ih62iII', t: 'AI in SMM', d: 'Saukaka aikin SMM da AI.'},
+                    {id: 'qbEn7hqdjkna_GPG', t: 'AI Strategy', d: 'Tsarin ciniki na zamani.'},
+                    {id: 'bonus_1', t: 'Final Success Guide', d: 'Matakin karshe na zama kwararre.'}
+                ]
+            }
+        };
+
+        const params = new URLSearchParams(window.location.search);
+        const type = params.get('type') || 'web';
+
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                const snap = await getDoc(doc(db, "users", user.uid));
+                if (snap.exists()) {
+                    const data = snap.data();
+                    document.getElementById('userName').innerText = data.fullName || "Student";
+                    
+                    // ACCESS CONTROL
+                    if(data.accessPro && data.approved) {
+                        document.getElementById('proGate').style.display = 'block';
+                    }
+                    
+                    if(data.role === 'admin' || user.email === "ayubaabdullahiumar@gmail.com") {
+                        document.getElementById('adminGate').style.display = 'block';
+                    }
+                }
+                renderClassroom();
+            } else { window.location.replace("auth.html"); }
+        });
+
+        function renderClassroom() {
+            const grid = document.getElementById('mMainGrid');
+            const hLevel = document.getElementById('courseLevel');
+            grid.innerHTML = ''; 
+
+            if(type === 'pro') {
+                hLevel.innerText = "SECTION: ELITE ALL-IN-ONE";
+                Object.keys(ACADEMY_DB).forEach(key => {
+                    grid.appendChild(createIntro(ACADEMY_DB[key]));
+                    ACADEMY_DB[key].vids.forEach((v, i) => grid.appendChild(createRoom(v, i+1)));
+                });
+            } else {
+                const course = ACADEMY_DB[type] || ACADEMY_DB['web'];
+                hLevel.innerText = `SECTION: ${course.name.toUpperCase()}`;
+                grid.appendChild(createIntro(course));
+                course.vids.forEach((v, i) => grid.appendChild(createRoom(v, i+1)));
+            }
+        }
+
+        function createIntro(course) {
+            const div = document.createElement('div');
+            div.className = 'house-intro';
+            div.innerHTML = `<h1>${course.name}</h1><p>${course.intro}</p>`;
+            return div;
+        }
+
+        function createRoom(v, num) {
+            const div = document.createElement('div');
+            div.className = 'video-room';
+            div.innerHTML = `
+                <div class="room-tv">
+                    <iframe src="https://www.youtube.com/embed/${v.id}?rel=0" allow="accelerometer; gyroscope; magnetometer; autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>
+                </div>
+                <div class="room-details">
+                    <span style="color:var(--accent); font-weight:800; font-size:0.65rem; letter-spacing:1px;">LESSON #${num}</span>
+                    <h2>${v.t}</h2>
+                    <p class="room-desc">${v.d}</p>
+                </div>`;
+            return div;
+        }
+
+        window.mToggleMenu = () => {
+            document.getElementById('mSidebar').classList.toggle('m-open');
+            document.getElementById('mOverlay').classList.toggle('active');
+        };
+
+        let sec = 0; setInterval(() => { sec++; let m = Math.floor(sec/60); let s = sec%60; document.getElementById('mTimer').innerText = `${m<10?'0'+m:m}:${s<10?'0'+s:s}`; }, 1000);
+    </script>
+</body>
+</html>

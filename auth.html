@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Authentication | Ayuba Digital Academy</title>
+  
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    :root { 
+        --primary: #0b3c8a; --accent: #c5a059; --bg-dark: #050a18; --card-bg: #0f172a;
+    }
+    
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: "Outfit", sans-serif; }
+    
+    body {
+      background: var(--bg-dark);
+      display: flex; justify-content: center; align-items: center;
+      min-height: 100vh; color: white; padding: 20px;
+    }
+
+    .card {
+      background: var(--card-bg);
+      padding: 40px 30px;
+      border-radius: 25px;
+      width: 100%; max-width: 400px;
+      text-align: center;
+      box-shadow: 0 15px 45px rgba(0,0,0,0.6);
+      border: 1px solid rgba(255,255,255,0.05);
+      position: relative;
+    }
+
+    .logo-img { width: 75px; height: 75px; border-radius: 50%; border: 3px solid var(--accent); margin-bottom: 15px; }
+
+    h2 { font-weight: 800; margin-bottom: 8px; font-size: 1.6rem; letter-spacing: 1px; }
+    p.subtitle { font-size: 0.85rem; color: #94a3b8; margin-bottom: 25px; }
+
+    .input-group { position: relative; margin-bottom: 15px; }
+    .input-group i { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: var(--accent); font-size: 0.9rem; }
+    
+    input {
+      width: 100%; padding: 14px 14px 14px 45px;
+      background: #1e293b; border: 1px solid #334155;
+      border-radius: 12px; color: white; outline: none; transition: 0.3s;
+      font-size: 0.95rem;
+    }
+    input:focus { border-color: var(--accent); background: #222f44; }
+
+    button {
+      width: 100%; padding: 15px;
+      background: var(--accent); color: #000;
+      border: none; border-radius: 12px;
+      font-weight: 800; cursor: pointer; transition: 0.3s;
+      margin-top: 10px; display: flex; justify-content: center; align-items: center; gap: 10px;
+    }
+    button:disabled { opacity: 0.6; cursor: not-allowed; }
+
+    .link-text { margin-top: 20px; font-size: 0.9rem; color: #94a3b8; }
+    .link-text span { color: var(--accent); cursor: pointer; font-weight: 700; text-decoration: underline; }
+
+    #signupForm { display: none; }
+
+    /* REDIRECT NOTIFICATION */
+    .dashboard-alert {
+      background: rgba(197, 160, 89, 0.1);
+      border: 1px solid var(--accent);
+      color: var(--accent);
+      padding: 12px; border-radius: 10px;
+      font-size: 0.8rem; margin-bottom: 20px;
+      display: none; align-items: center; gap: 10px;
+      text-align: left;
+    }
+
+    /* LOADING SPINNER */
+    .spinner {
+      width: 20px; height: 20px;
+      border: 3px solid #000; border-top: 3px solid transparent;
+      border-radius: 50%; animation: spin 0.8s linear infinite;
+      display: none;
+    }
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+
+<div class="card">
+  <img src="logo.jpg" alt="Logo" class="logo-img">
+  <h2>ADS ACADEMY</h2>
+  <p class="subtitle">Empowering Your Digital Future</p>
+
+  <div id="dashAlert" class="dashboard-alert">
+    <i class="fas fa-shield-halved"></i>
+    <span>Don Allah kayi Login ko SignUp domin samun damar shiga Dashboard dinka.</span>
+  </div>
+
+  <div id="loginForm">
+    <div class="input-group">
+      <i class="fas fa-envelope"></i>
+      <input type="email" id="loginEmail" placeholder="Email Address">
+    </div>
+    <div class="input-group">
+      <i class="fas fa-lock"></i>
+      <input type="password" id="loginPassword" placeholder="Password">
+    </div>
+    <button id="loginBtn" onclick="login()">
+      <span id="loginBtnText">LOGIN TO SYSTEM</span>
+      <div class="spinner" id="loginSpinner"></div>
+    </button>
+    <p class="link-text">Baka da account? <span onclick="showSignup()">Create One</span></p>
+    <p class="link-text" style="font-size: 0.8rem; margin-top: 10px;"><span onclick="resetPassword()">Forgot Password?</span></p>
+  </div>
+
+  <div id="signupForm">
+    <div class="input-group">
+      <i class="fas fa-envelope"></i>
+      <input type="email" id="signupEmail" placeholder="Your Email">
+    </div>
+    <div class="input-group">
+      <i class="fas fa-lock"></i>
+      <input type="password" id="signupPassword" placeholder="Create Password">
+    </div>
+    <div class="input-group">
+      <i class="fas fa-check-circle"></i>
+      <input type="password" id="confirmPassword" placeholder="Confirm Password">
+    </div>
+    <button id="signupBtn" onclick="signup()">
+      <span id="signupBtnText">CREATE ACCOUNT</span>
+      <div class="spinner" id="signupSpinner"></div>
+    </button>
+    <p class="link-text">Kuna da Account? <span onclick="showLogin()">Sign In</span></p>
+  </div>
+</div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+  import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendEmailVerification, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+  import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyDPujPkmHXRS1pBifgY6kcpXbN3Ar7W1aM",
+    authDomain: "ayubadigitalacademy.firebaseapp.com",
+    projectId: "ayubadigitalacademy",
+    storageBucket: "ayubadigitalacademy.firebasestorage.app",
+    messagingSenderId: "584571579762",
+    appId: "1:584571579762:web:08ffa80c321dcc6de641eb"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+
+  // REDIRECTION LOGIC
+  const urlParams = new URLSearchParams(window.location.search);
+  const isFromDashboard = urlParams.get('msg') === 'dashboard';
+
+  if (isFromDashboard) {
+      document.getElementById('dashAlert').style.display = 'flex';
+  }
+
+  const handleRedirect = () => {
+    if (isFromDashboard) {
+        window.location.href = "dashboard.html";
+    } else {
+        window.location.href = "index.html"; // "Indeed" Page dinka
+    }
+  };
+
+  window.showSignup = () => {
+    document.getElementById("loginForm").style.display = "none";
+    document.getElementById("signupForm").style.display = "block";
+  };
+
+  window.showLogin = () => {
+    document.getElementById("loginForm").style.display = "block";
+    document.getElementById("signupForm").style.display = "none";
+  };
+
+  // LOGIN
+  window.login = async () => {
+    const email = document.getElementById("loginEmail").value;
+    const pass = document.getElementById("loginPassword").value;
+    const btn = document.getElementById("loginBtn");
+    const spinner = document.getElementById("loginSpinner");
+    const btnText = document.getElementById("loginBtnText");
+
+    if(!email || !pass) { alert("Don Allah cike guraren!"); return; }
+
+    btn.disabled = true; spinner.style.display = "block"; btnText.innerText = "Checking...";
+
+    try {
+      const cred = await signInWithEmailAndPassword(auth, email, pass);
+      if (!cred.user.emailVerified) {
+        alert("Don Allah ka fara verify din email dinka kafin login.");
+        btn.disabled = false; spinner.style.display = "none"; btnText.innerText = "LOGIN TO SYSTEM";
+        return;
+      }
+      handleRedirect();
+    } catch (e) {
+      alert("Email ko Password dinka ba daidai ba ne.");
+      btn.disabled = false; spinner.style.display = "none"; btnText.innerText = "LOGIN TO SYSTEM";
+    }
+  };
+
+  // SIGNUP
+  window.signup = async () => {
+    const email = document.getElementById("signupEmail").value;
+    const pass = document.getElementById("signupPassword").value;
+    const confirm = document.getElementById("confirmPassword").value;
+    const btn = document.getElementById("signupBtn");
+    const spinner = document.getElementById("signupSpinner");
+    const btnText = document.getElementById("signupBtnText");
+
+    if (pass !== confirm) { alert("Passwords do not match!"); return; }
+
+    btn.disabled = true; spinner.style.display = "block"; btnText.innerText = "Creating...";
+
+    try {
+      const user = await createUserWithEmailAndPassword(auth, email, pass);
+      await sendEmailVerification(user.user);
+      
+      await setDoc(doc(db, "users", user.user.uid), {
+        email: email,
+        fullName: email.split('@')[0].toUpperCase(),
+        role: "student",
+        approved: false,
+        accessAI: false, accessWeb: false, accessSMM: false, accessPro: false,
+        createdAt: new Date()
+      });
+
+      alert("An bude account cikin nasara! Mun tura link zuwa email dinka domin verification.");
+      showLogin();
+    } catch (e) {
+      alert(e.message);
+    } finally {
+      btn.disabled = false; spinner.style.display = "none"; btnText.innerText = "CREATE ACCOUNT";
+    }
+  };
+
+  // RESET PASSWORD
+  window.resetPassword = async () => {
+    const email = prompt("Shigar da Email dinka:");
+    if (!email) return;
+    try {
+      await sendPasswordResetEmail(auth, email);
+      alert("An tura link na canza password zuwa email dinka.");
+    } catch (e) {
+      alert(e.message);
+    }
+  };
+</script>
+
+</body>
+</html>
