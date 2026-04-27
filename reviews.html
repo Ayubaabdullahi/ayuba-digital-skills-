@@ -100,9 +100,20 @@
     .user-info h4 { font-size: 1rem; color: var(--secondary); font-weight: 800; }
     .user-info span { font-size: 0.8rem; color: #28a745; font-weight: bold; }
 
+    /* VIDEO SECTION STYLING */
     .video-section { background: var(--secondary); color: white; padding: 60px 20px; border-radius: 25px; text-align: center; margin-top: 50px; }
-    .video-placeholder { width: 100%; max-width: 700px; height: 350px; background: rgba(255,255,255,0.05); margin: 30px auto; border: 2px dashed rgba(255,255,255,0.2); border-radius: 20px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 15px; }
-    .video-placeholder i { font-size: 4rem; color: var(--gold); }
+    .video-container { 
+      position: relative; 
+      width: 100%; 
+      max-width: 400px; /* Shorts look better in narrow containers */
+      aspect-ratio: 9 / 16; /* Portrait ratio for Shorts */
+      margin: 30px auto; 
+      border-radius: 20px; 
+      overflow: hidden; 
+      box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+      border: 3px solid var(--accent);
+    }
+    .video-container iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; }
 
     .cta-review { text-align: center; margin-top: 60px; padding: 40px; background: var(--white); border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
     .cta-btn { display: inline-block; padding: 15px 35px; background: var(--primary); color: white; text-decoration: none; border-radius: 10px; font-weight: bold; margin-top: 20px; transition: 0.3s; }
@@ -112,7 +123,7 @@
     .social-links { display: flex; justify-content: center; gap: 20px; margin-bottom: 30px; flex-wrap: wrap; }
     .social-links a { color: white; font-size: 1.7rem; transition: 0.3s; text-decoration: none; }
 
-    @media (max-width: 768px) { .review-hero h1 { font-size: 1.8rem; } .video-placeholder { height: 220px; } }
+    @media (max-width: 768px) { .review-hero h1 { font-size: 1.8rem; } .video-container { max-width: 100%; } }
   </style>
 </head>
 <body>
@@ -208,10 +219,14 @@
 
   <div class="video-section">
     <h2><i class="fas fa-play-circle"></i> Video Testimonials</h2>
-    <p>Watching real people share real results.</p>
-    <div class="video-placeholder">
-      <i class="fas fa-video-slash"></i>
-      <p>Video reviews are being processed.<br><b>Check back soon!</b></p>
+    <p>Watching real people share real results at Ayuba Academy.</p>
+    
+    <div class="video-container">
+      <iframe src="https://www.youtube.com/embed/MB53iIDoh_4" 
+              title="Ayuba Digital Skills Review" 
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+              allowfullscreen>
+      </iframe>
     </div>
   </div>
 
